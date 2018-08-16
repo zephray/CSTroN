@@ -96,6 +96,7 @@ module top(
 
     // DDR2
     /*inout  [63:0]  DDR2_D,
+    output [7:0]   DDR2_DM,
     output [12:0]  DDR2_A,
     output [1:0]   DDR2_CLK_P,
     output [1:0]   DDR2_CLK_N,
@@ -106,9 +107,9 @@ module top(
     output         DDR2_CAS_B,
     output         DDR2_WE_B,
     output [1:0]   DDR2_BA,
-    output [7:0]   DDR2_DQS_P,
-    output [7:0]   DDR2_DQS_N,
-    output         DDR2_SCL,
+    inout  [7:0]   DDR2_DQS_P,
+    inout  [7:0]   DDR2_DQS_N,*/
+    /*output         DDR2_SCL,
     inout          DDR2_SDA,*/
     
     // Speaker
@@ -176,27 +177,28 @@ module top(
     );
   
     //Keys
+    wire lcd_vsync;
     button button_c(
-        .pressed(bp_step), 
+        .pressed(), 
         .pressed_disp(GPIO_LED_C),
         .button_input(GPIO_SW_C),
-        .clock(clk_gb),
+        .clock(clk_18),
         .reset(reset)
     );
     
     button button_w(
-        .pressed(bp_change), 
+        .pressed(), 
         .pressed_disp(GPIO_LED_W),
         .button_input(GPIO_SW_W),
-        .clock(clk_gb),
+        .clock(clk_18),
         .reset(reset)
     );
     
     button button_e(
-        .pressed(bp_continue), 
+        .pressed(), 
         .pressed_disp(GPIO_LED_E),
         .button_input(GPIO_SW_E),
-        .clock(clk_gb),
+        .clock(clk_18),
         .reset(reset)
     );
     
@@ -204,7 +206,7 @@ module top(
         .pressed(), 
         .pressed_disp(GPIO_LED_S),
         .button_input(GPIO_SW_S),
-        .clock(clk_gb),
+        .clock(clk_18),
         .reset(reset)
     );
     
@@ -214,89 +216,42 @@ module top(
     
     assign GPIO_LED[7:0] = 8'h00;
 
-    // experimental
-    //Horizontal
-    parameter H_FRONT   = 31; // Front porch
-    parameter H_BACK    = 8;  // Back porch
-    parameter H_LP      = 6;  // LP Pulse width
-    parameter H_WAIT    = 11; // BP after pulse
-    parameter H_ACT     = 640;// Active pixels
-    parameter H_TOTAL   = H_FRONT + H_BACK + H_LP + H_WAIT + H_ACT;
-
-    //Vertical
-    parameter V_ACT     = 240; // Active lines
+    // Display
+    wire fifo_rd_clk;
+    wire [47:0] fifo_rd_data;
+    wire fifo_rd_en;
+    wire fifo_rd_empty;
     
-    reg [10:0] h_count;
-    reg [10:0] v_count;
     
-    wire flm;
-    reg lp;
-    reg xck;
-    reg iclk;
-    reg [1:0] div3;
+    /*clk_div #(.WIDTH(21), .DIV(250000)) frame_div(
+        .i(clk_18),
+        .o(lcd_vsync)
+    );*/
+    assign lcd_vsync = 1'b1;
     
-    assign flm = (v_count == 11'b0) ? 1'b1 : 1'b0;
+    lcdc lcdc(
+        .clk(clk_18),
+        .rst(reset),
+        .cstn_xck(CSTN_XCK),
+        .cstn_lp(CSTN_LP),
+        .cstn_flm(CSTN_FLM),
+        .cstn_dispoff(CSTN_DISPOFF),
+        .cstn_ud(CSTN_UD),
+        .cstn_ld(CSTN_LD),
+        .fifo_clk(fifo_rd_clk),
+        .fifo_data(fifo_rd_data),
+        .fifo_re(fifo_rd_en),
+        .fifo_empty(fifo_rd_empty),
+        .vsync_in(lcd_vsync)
+    );
     
-    always @(posedge clk_18 or posedge reset)
-    begin
-        if(reset)
-        begin
-            h_count <= 0;
-            lp <= 0;
-            xck <= 0;
-            iclk <= 0;
-            v_count <= 0;
-            div3 <= 0;
-        end
-        else
-        begin      
-            iclk <= ~iclk;
-            if(h_count < H_TOTAL) begin
-                if (iclk) begin // second clock
-                    h_count <= h_count + 1'b1;
-                    if (div3 == 2'b10) begin
-                        div3 <= 2'b00;
-                    end else begin
-                        div3 <= div3 + 1;
-                    end
-                end
-            end else begin
-                h_count <= 0;
-                div3 <= 0;
-            end
-            
-            if ((h_count > H_FRONT)&&(h_count <= (H_FRONT + H_ACT))) begin
-                xck <= iclk;
-            end else begin
-                xck <= 1'b0;
-            end
-            
-            if ((h_count > (H_FRONT + H_ACT + H_BACK))&&(h_count <= (H_FRONT + H_ACT + H_BACK + H_LP))) begin
-                lp <= 1'b1;
-            end else begin
-                lp <= 1'b0;
-            end
-            
-            if ((h_count == (H_FRONT + H_ACT + H_BACK + H_LP + H_WAIT - 1))&&(iclk)) begin
-                if (v_count < (V_ACT - 1)) begin
-                    v_count <= v_count + 1;
-                end else begin
-                    v_count <= 0;
-                end
-            end
-           
-        end 
-    end
+    // FIFO
     
-    assign CSTN_XCK = xck;
-    assign CSTN_LP = lp;
-    assign CSTN_FLM = flm;
-    assign CSTN_DISPOFF = 1'b1;
-    
+    // fake fifo
     reg [7:0] frame_count;
     reg [2:0] color;
     
-    always @(posedge flm or posedge reset) 
+    always @(posedge CSTN_FLM or posedge reset) 
     begin
         if (reset) begin
             frame_count <= 0;
@@ -308,11 +263,5 @@ module top(
         end
     end
     
-    wire [7:0] color_pattern_1 = {color[2:0], color[2:0], color[2:1]};
-    wire [7:0] color_pattern_2 = {color[0], color[2:0], color[2:0], color[2]};
-    wire [7:0] color_pattern_3 = {color[1:0], color[2:0], color[2:0]};
-    wire [7:0] cstn_color = (div3 == 2'b00) ? (color_pattern_1) : ((div3 == 2'b01) ? (color_pattern_2) : (color_pattern_3) );
-    assign CSTN_UD[7:0] = cstn_color;
-    assign CSTN_LD[7:0] = cstn_color;
-
+    assign fifo_rd_data = {16{color}};
 endmodule
