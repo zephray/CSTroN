@@ -87,6 +87,7 @@ module frc(
         .rst(rst),
         .flm(flm),
         .raw_in(upper_r),
+        .inv(x[0]^y[0]),
         .dither_out(output_upper_r)
     );
     
@@ -94,6 +95,7 @@ module frc(
         .rst(rst),
         .flm(flm),
         .raw_in(upper_g),
+        .inv(x[0]^y[0]),
         .dither_out(output_upper_g)
     );
     
@@ -101,6 +103,7 @@ module frc(
         .rst(rst),
         .flm(flm),
         .raw_in(upper_b),
+        .inv(x[0]^y[0]),
         .dither_out(output_upper_b)
     );
     
@@ -108,6 +111,7 @@ module frc(
         .rst(rst),
         .flm(flm),
         .raw_in(lower_r),
+        .inv(x[0]^y[0]),
         .dither_out(output_lower_r)
     );
 
@@ -115,6 +119,7 @@ module frc(
         .rst(rst),
         .flm(flm),
         .raw_in(lower_g),
+        .inv(x[0]^y[0]),
         .dither_out(output_lower_g)
     );
     
@@ -122,6 +127,7 @@ module frc(
         .rst(rst),
         .flm(flm),
         .raw_in(lower_b),
+        .inv(x[0]^y[0]),
         .dither_out(output_lower_b)
     );
 
