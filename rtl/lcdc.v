@@ -61,7 +61,11 @@ module lcdc(
     reg [23:0] upper_buffer;
     reg [23:0] lower_buffer;
     
-    reg state; // S0 - idle, wait for sync; S1 - refreshing
+    wire [23:0] fifo_upper_data = {fifo_data[47:45], fifo_data[41:39], fifo_data[35:33], fifo_data[29:27], 
+        fifo_data[23:21], fifo_data[17:15], fifo_data[11:9], fifo_data[5:3]};
+    wire [23:0] fifo_lower_data = {fifo_data[44:42], fifo_data[38:36], fifo_data[32:30], fifo_data[26:24], 
+        fifo_data[20:18], fifo_data[14:12], fifo_data[8:6], fifo_data[2:0]};
+    reg [1:0] state; // S0 - idle, wait for sync; S1 - refreshing; S2 - wait for FIFO
     
     assign flm = (v_count == 11'b0) ? 1'b1 : 1'b0;
     
@@ -77,14 +81,17 @@ module lcdc(
             div3 <= 0;
             fifo_clk <= 1'b0;
             fifo_re <= 1'b0;
-            state <= 1'b0;
+            state <= 0;
         end
         else
         begin      
-            if (state == 1'b0) begin // idle state
+            if (state == 2'd0) begin // idle state
                 if (vsync_in)
-                    state <= 1'b1;
-            
+                    state <= 2'd2;
+            end else if (state == 2'd2) begin
+                if (!fifo_empty)
+                    state <= 2'd1;
+                fifo_clk <= ~fifo_clk;
             end else begin // refresh state
                 iclk <= ~iclk;
             
@@ -98,7 +105,7 @@ module lcdc(
                 end
                 
                 // Div by 3 counter, FIFO read logic
-                if ((v_count < V_ACT) && (h_count > (H_FRONT - 6))&&(h_count <= (H_FRONT + H_ACT - 6))) begin
+                if ((v_count < V_ACT) && (h_count > (H_FRONT - 18))&&(h_count <= (H_FRONT + H_ACT))) begin
                     
                     if (~iclk) begin // was low, rising edge
                         // Counter
@@ -116,15 +123,24 @@ module lcdc(
                         
                         // Fifo Logic
                         if (div3 == 2'b00) begin
-                            upper_buffer <= fifo_data[47:24];
-                            lower_buffer <= fifo_data[23:0];
-                            if (!fifo_empty) fifo_re <= 1'b1; else fifo_re <= 1'b0;
+                            upper_buffer <= fifo_upper_data;
+                            lower_buffer <= fifo_lower_data;
                         end
                     end
                     
                 end else begin
                     div3 <= 0;
                     fifo_clk <= 1'b0;
+                end 
+                
+                // FIFO read enable
+                if ((v_count < V_ACT) && (h_count > (H_FRONT - 6))&&(h_count <= (H_FRONT + H_ACT - 6))) begin
+                    if (~iclk) begin // rising edge
+                        if (div3 == 2'b00) begin
+                            if (!fifo_empty) fifo_re <= 1'b1; else fifo_re <= 1'b0;
+                        end
+                    end
+                end else begin
                     fifo_re <= 1'b0;
                 end 
                 
@@ -133,9 +149,9 @@ module lcdc(
                     xck <= iclk;
                     if (iclk) begin // was high, falling edge, rising edge of LCD
                         case(div3)
-                            2'b00: begin ud <= upper_buffer[23:16]; ld <= lower_buffer[23:16]; end
-                            2'b01: begin ud <= upper_buffer[15:8];  ld <= lower_buffer[15:8];  end
-                            2'b10: begin ud <= upper_buffer[7:0];   ld <= lower_buffer[7:0];   end
+                            2'b01: begin ud <= upper_buffer[23:16]; ld <= lower_buffer[23:16]; end
+                            2'b10: begin ud <= upper_buffer[15:8];  ld <= lower_buffer[15:8];  end
+                            2'b00: begin ud <= upper_buffer[7:0];   ld <= lower_buffer[7:0];   end
                         endcase
                     end else begin // was low, rising edge
                         // do nothing, FIFO reading might happen at this edge

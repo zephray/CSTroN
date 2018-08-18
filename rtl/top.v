@@ -149,6 +149,7 @@ module top(
     //Clock and Reset control   
     wire clk_33;
     wire clk_18; // 2x CSTN clock
+    wire clk_50; // FRC clock
 
     wire reset_in;
     wire reset_pll;
@@ -162,7 +163,7 @@ module top(
         .CLKIN1_IN(clk_33), 
         .RST_IN(reset_pll), 
         .CLKOUT0_OUT(clk_18), 
-        .CLKOUT1_OUT(), 
+        .CLKOUT1_OUT(clk_50), 
         .CLKOUT2_OUT(),
         .CLKOUT3_OUT(),
         .LOCKED_OUT(locked_pll)
@@ -210,17 +211,16 @@ module top(
         .reset(reset)
     );
     
-    assign GPIO_LED_N = reset;
-    
-    wire [7:0] dip_sw = {GPIO_DIP_SW[0], GPIO_DIP_SW[1], GPIO_DIP_SW[2], GPIO_DIP_SW[3], GPIO_DIP_SW[4], GPIO_DIP_SW[5], GPIO_DIP_SW[6], GPIO_DIP_SW[7]};
-    
-    assign GPIO_LED[7:0] = 8'h00;
 
     // Display
     wire fifo_rd_clk;
     wire [47:0] fifo_rd_data;
     wire fifo_rd_en;
     wire fifo_rd_empty;
+    wire fifo_wr_clk;
+    wire [5:0] fifo_wr_data;
+    wire fifo_wr_en;
+    wire fifo_wr_full;
     
     
     /*clk_div #(.WIDTH(21), .DIV(250000)) frame_div(
@@ -245,10 +245,9 @@ module top(
         .vsync_in(lcd_vsync)
     );
     
-    // FIFO
-    
-    // fake fifo
-    reg [7:0] frame_count;
+    // Fake FIFO
+    //assign fifo_empty = 1;
+    /*reg [7:0] frame_count;
     reg [2:0] color;
     
     always @(posedge CSTN_FLM or posedge reset) 
@@ -263,5 +262,44 @@ module top(
         end
     end
     
-    assign fifo_rd_data = {16{color}};
+    assign fifo_rd_data = {16{color}};*/
+    //assign fifo_rd_data = 48'h924924924924;
+    
+    // FRC
+    frc frc(
+        .clk(clk_50),
+        .rst(reset),
+        .fifo_we(fifo_wr_en),
+        .fifo_data(fifo_wr_data),
+        .fifo_full(fifo_wr_full),
+        .fifo_clk(fifo_wr_clk),
+        .ddr_re(),
+        .ddr_data(),
+        .ddr_addr(),
+        .ddr_empty(),
+        .ddr_clk(),
+        .trigger(lcd_vsync)
+    );
+    
+    // FIFO
+    frc_lcdc_fifo frc_lcdc_fifo (
+        .rst(reset), // input rst
+        .wr_clk(fifo_wr_clk), // input wr_clk
+        .rd_clk(fifo_rd_clk), // input rd_clk
+        .din(fifo_wr_data), // input [5 : 0] din
+        .wr_en(fifo_wr_en), // input wr_en
+        .rd_en(fifo_rd_en), // input rd_en
+        .dout(fifo_rd_data), // output [47 : 0] dout
+        .full(fifo_wr_full), // output full
+        .empty(fifo_rd_empty) // output empty
+    );
+    
+    
+    assign GPIO_LED_N = reset;
+    
+    wire [7:0] dip_sw = {GPIO_DIP_SW[0], GPIO_DIP_SW[1], GPIO_DIP_SW[2], GPIO_DIP_SW[3], GPIO_DIP_SW[4], GPIO_DIP_SW[5], GPIO_DIP_SW[6], GPIO_DIP_SW[7]};
+    assign GPIO_LED[7] = fifo_wr_full;
+    assign GPIO_LED[6] = fifo_rd_empty;
+    assign GPIO_LED[5:0] = 6'b0;
+    
 endmodule
