@@ -373,11 +373,11 @@ module sequencer(
                     end
                     else begin
                         ticks_since_last_sync <= ticks_since_last_sync + 1'd1;
-                        if (ticks_since_last_cstn_frame != cstn_vsync_threshold)
+                        if (ticks_since_last_cstn_frame != cstn_vsync_threshold) begin
                             ticks_since_last_cstn_frame <= ticks_since_last_cstn_frame + 1'd1;
                             if (ticks_since_last_cstn_frame > 19'd200000)
                                 lcdc_vsync <= 1'b0;
-                        else begin
+                        end else begin
                             // CSTN VSYNC
                             ticks_since_last_cstn_frame <= 1'b0;
                             rd_position <= 0;
