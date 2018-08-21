@@ -21,50 +21,21 @@
 module frc(
     input clk,
     input rst,
-    output reg fifo_we,
-    output reg [5:0] fifo_data,
-    input fifo_full,
-    output fifo_clk,
-    output ddr_re,
-    input [31:0] ddr_data,
-    output [20:0] ddr_addr,
-    input ddr_empty,
-    output ddr_clk,
-    input trigger
+    output reg lcd_wr_en,
+    output reg [5:0] lcd_wr_data,
+    input lcd_wr_full,
+    input lcd_wr_almost_full,
+    output lcd_wr_clk,
+    input [31:0] seq_rd_data,
+    output reg seq_rd_en,
+    input seq_rd_empty,
+    output seq_rd_clk,
+    input vsync
     );
-
-    /* DEBUG */
+    // x, y counter for chess pattern generation
     reg [9:0] x;
     reg [9:0] y;
-    
-    reg [15:0] image_data;
 
-    always@(negedge clk)
-    begin
-        if (y < 80) 
-            image_data <= {x[8:4], 6'b0, 5'b0};
-        else if (y < 160)
-            image_data <= {5'b0, x[8:3], 5'b0};
-        else
-            image_data <= {5'b0, 6'b0, x[8:4]};
-    end
-    
-    // Not Pipelined Design, Process 32 bit of data (2pixels) at a time
-    
-    parameter S_IDLE = 4'd0;
-    parameter S_FETCH_1 = 4'd1;
-    parameter S_FETCH_2 = 4'd2;
-    parameter S_FETCH_3 = 4'd3;
-    parameter S_WB = 4'd4;
-    
-    reg flm; // new frame mark
-    
-    reg [3:0] state;
-    reg [3:0] next_state;
-    
-    reg [18:0] upper_pointer;
-    reg [18:0] lower_pointer;
-    
     reg [15:0] upper_pixel;
     reg [15:0] lower_pixel;
     
@@ -85,7 +56,7 @@ module frc(
     // GLDP
     gldp_lut gldp_lut_upper_r(
         .rst(rst),
-        .flm(flm),
+        .flm(vsync),
         .raw_in(upper_r),
         .inv(x[0]^y[0]),
         .dither_out(output_upper_r)
@@ -93,7 +64,7 @@ module frc(
     
     gldp_lut gldp_lut_upper_g(
         .rst(rst),
-        .flm(flm),
+        .flm(vsync),
         .raw_in(upper_g),
         .inv(x[0]^y[0]),
         .dither_out(output_upper_g)
@@ -101,7 +72,7 @@ module frc(
     
     gldp_lut gldp_lut_upper_b(
         .rst(rst),
-        .flm(flm),
+        .flm(vsync),
         .raw_in(upper_b),
         .inv(x[0]^y[0]),
         .dither_out(output_upper_b)
@@ -109,7 +80,7 @@ module frc(
     
     gldp_lut gldp_lut_lower_r(
         .rst(rst),
-        .flm(flm),
+        .flm(vsync),
         .raw_in(lower_r),
         .inv(x[0]^y[0]),
         .dither_out(output_lower_r)
@@ -117,7 +88,7 @@ module frc(
 
     gldp_lut gldp_lut_lower_g(
         .rst(rst),
-        .flm(flm),
+        .flm(vsync),
         .raw_in(lower_g),
         .inv(x[0]^y[0]),
         .dither_out(output_lower_g)
@@ -125,7 +96,7 @@ module frc(
     
     gldp_lut gldp_lut_lower_b(
         .rst(rst),
-        .flm(flm),
+        .flm(vsync),
         .raw_in(lower_b),
         .inv(x[0]^y[0]),
         .dither_out(output_lower_b)
@@ -133,40 +104,56 @@ module frc(
 
     wire [5:0] output_pixel = {output_upper_r, output_upper_g, output_upper_b, 
         output_lower_r, output_lower_g, output_lower_b};
-    
-    always @(*)
-    begin
-        next_state = S_IDLE;
-        if ((!rst)&&(state == S_IDLE)&&(trigger)) next_state = S_FETCH_3;
-        if ((!rst)&&(state == S_FETCH_2)) next_state = S_FETCH_3;
-        if ((!rst)&&(state == S_FETCH_3)) next_state = S_WB;
-        if ((!rst)&&(state == S_WB)&&(!fifo_full)&&(upper_pointer != 19'd153600)) next_state = S_FETCH_3;
-        if ((!rst)&&(state == S_WB)&&(!fifo_full)&&(upper_pointer == 19'd153600)) next_state = S_IDLE;
-        if ((!rst)&&(state == S_WB)&&(fifo_full)) next_state = S_WB;
-    end
-    
+
+    // Pipeline
+    assign seq_rd_clk = ~clk;
+
+    reg data_valid_next_clock;
+    reg data_valid;
+
+    // Stage 1: Fetch
     always @(posedge clk, posedge rst)
     begin
         if (rst) begin
-            state <= S_IDLE;  
-            fifo_we <= 0;  
+            data_valid <= 1'b0;
+            data_valid_next_clock <= 1'b0;
         end
         else begin
-            state <= next_state;
-            case (state)
-                S_IDLE: begin
-                    //?
-                    fifo_we <= 0;
+            data_valid <= data_valid_next_clock;
+            if ((!lcd_wr_almost_full)&&(!seq_rd_empty)) begin
+                // Can fetch
+                seq_rd_en <= 1'b1;
+                data_valid_next_clock <= 1'b1;
+            end
+            else begin
+                seq_rd_en <= 1'b0;
+                data_valid_next_clock <= 1'b0;
+            end
+        end
+    end
+
+    // Stage 2: Process
+    reg data_ready;
+    reg vsync_last;
+    always @(posedge clk, posedge rst)
+    begin
+        if (rst) begin
+            data_ready <= 1'b0;
+            upper_pixel <= 16'b111110000000000;
+            lower_pixel <= 16'b111110000000000; // should not be used
+            x <= 0;
+            y <= 0;
+        end
+        else begin
+            if (data_valid) begin
+                upper_pixel <= seq_rd_data[31:16];
+                lower_pixel <= seq_rd_data[15:0];
+                data_ready <= 1'b1;
+                if ((vsync_last == 1'b0)&&(vsync == 1'b1)) begin
                     x <= 0;
                     y <= 0;
-                    upper_pointer <= 0;
-                    flm <= 1;
                 end
-                S_FETCH_3: begin
-                    flm <= 0;
-                    fifo_we <= 0;
-                    upper_pixel <= image_data;
-                    lower_pixel <= image_data;
+                else begin
                     if (x < 10'd640 - 1) begin
                         x <= x + 1;
                     end
@@ -174,31 +161,30 @@ module frc(
                         x <= 0;
                         y <= y + 1;
                     end
-                    upper_pointer <= upper_pointer + 1;
                 end
-                //S_PROCESS: begin
-                    
-                //end
-                S_WB: begin
-                    flm <= 0;
-                    if (!fifo_full) begin
-                        fifo_we <= 1;
-                        fifo_data <= output_pixel;
-                    end
-                end
-            endcase
+            end
+            else begin
+                data_ready <= 1'b0;
+            end
         end
     end
-    
-    // Fetch Unit
-    //reg fetch_stall;
-    //reg data_valid;
-    
-    
-    // Store Unit
-    assign fifo_clk = ~clk;
-    
 
-    
+    // Stage 3: Write
+    assign lcd_wr_clk = ~clk;
+    always @(posedge clk, posedge rst)
+    begin
+        if (rst) begin
+            lcd_wr_en <= 1'b0;
+        end
+        else begin
+            if ((!lcd_wr_full)&&(data_ready)) begin
+                lcd_wr_en <= 1'b1;
+                lcd_wr_data <= output_pixel;
+            end
+            else begin
+                lcd_wr_en <= 1'b0;
+            end
+        end
+    end
 
 endmodule

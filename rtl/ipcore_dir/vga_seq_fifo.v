@@ -25,8 +25,8 @@
 *     (c) Copyright 1995-2018 Xilinx, Inc.                                     *
 *     All rights reserved.                                                     *
 *******************************************************************************/
-// You must compile the wrapper file frc_lcdc_fifo.v when simulating
-// the core, frc_lcdc_fifo. When compiling the wrapper file, be sure to
+// You must compile the wrapper file vga_seq_fifo.v when simulating
+// the core, vga_seq_fifo. When compiling the wrapper file, be sure to
 // reference the XilinxCoreLib Verilog simulation library. For detailed
 // instructions, please refer to the "CORE Generator Help".
 
@@ -36,7 +36,7 @@
 
 `timescale 1ns/1ps
 
-module frc_lcdc_fifo(
+module vga_seq_fifo(
   rst,
   wr_clk,
   rd_clk,
@@ -46,19 +46,19 @@ module frc_lcdc_fifo(
   dout,
   full,
   empty,
-  prog_full
+  prog_empty
 );
 
 input rst;
 input wr_clk;
 input rd_clk;
-input [5 : 0] din;
+input [15 : 0] din;
 input wr_en;
 input rd_en;
-output [47 : 0] dout;
+output [127 : 0] dout;
 output full;
 output empty;
-output prog_full;
+output prog_empty;
 
 // synthesis translate_off
 
@@ -88,9 +88,9 @@ output prog_full;
     .C_AXIS_TYPE(0),
     .C_COMMON_CLOCK(0),
     .C_COUNT_TYPE(0),
-    .C_DATA_COUNT_WIDTH(8),
+    .C_DATA_COUNT_WIDTH(10),
     .C_DEFAULT_VALUE("BlankString"),
-    .C_DIN_WIDTH(6),
+    .C_DIN_WIDTH(16),
     .C_DIN_WIDTH_AXIS(1),
     .C_DIN_WIDTH_RACH(32),
     .C_DIN_WIDTH_RDCH(64),
@@ -98,7 +98,7 @@ output prog_full;
     .C_DIN_WIDTH_WDCH(64),
     .C_DIN_WIDTH_WRCH(2),
     .C_DOUT_RST_VAL("0"),
-    .C_DOUT_WIDTH(48),
+    .C_DOUT_WIDTH(128),
     .C_ENABLE_RLOCS(0),
     .C_ENABLE_RST_SYNC(1),
     .C_ERROR_INJECTION_TYPE(0),
@@ -171,7 +171,7 @@ output prog_full;
     .C_OVERFLOW_LOW(0),
     .C_PRELOAD_LATENCY(1),
     .C_PRELOAD_REGS(0),
-    .C_PRIM_FIFO_TYPE("512x36"),
+    .C_PRIM_FIFO_TYPE("1kx18"),
     .C_PROG_EMPTY_THRESH_ASSERT_VAL(2),
     .C_PROG_EMPTY_THRESH_ASSERT_VAL_AXIS(1022),
     .C_PROG_EMPTY_THRESH_ASSERT_VAL_RACH(1022),
@@ -180,22 +180,22 @@ output prog_full;
     .C_PROG_EMPTY_THRESH_ASSERT_VAL_WDCH(1022),
     .C_PROG_EMPTY_THRESH_ASSERT_VAL_WRCH(1022),
     .C_PROG_EMPTY_THRESH_NEGATE_VAL(3),
-    .C_PROG_EMPTY_TYPE(0),
+    .C_PROG_EMPTY_TYPE(1),
     .C_PROG_EMPTY_TYPE_AXIS(0),
     .C_PROG_EMPTY_TYPE_RACH(0),
     .C_PROG_EMPTY_TYPE_RDCH(0),
     .C_PROG_EMPTY_TYPE_WACH(0),
     .C_PROG_EMPTY_TYPE_WDCH(0),
     .C_PROG_EMPTY_TYPE_WRCH(0),
-    .C_PROG_FULL_THRESH_ASSERT_VAL(252),
+    .C_PROG_FULL_THRESH_ASSERT_VAL(1021),
     .C_PROG_FULL_THRESH_ASSERT_VAL_AXIS(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_RACH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_RDCH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_WACH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_WDCH(1023),
     .C_PROG_FULL_THRESH_ASSERT_VAL_WRCH(1023),
-    .C_PROG_FULL_THRESH_NEGATE_VAL(251),
-    .C_PROG_FULL_TYPE(1),
+    .C_PROG_FULL_THRESH_NEGATE_VAL(1020),
+    .C_PROG_FULL_TYPE(0),
     .C_PROG_FULL_TYPE_AXIS(0),
     .C_PROG_FULL_TYPE_RACH(0),
     .C_PROG_FULL_TYPE_RDCH(0),
@@ -203,10 +203,10 @@ output prog_full;
     .C_PROG_FULL_TYPE_WDCH(0),
     .C_PROG_FULL_TYPE_WRCH(0),
     .C_RACH_TYPE(0),
-    .C_RD_DATA_COUNT_WIDTH(5),
-    .C_RD_DEPTH(32),
+    .C_RD_DATA_COUNT_WIDTH(7),
+    .C_RD_DEPTH(128),
     .C_RD_FREQ(1),
-    .C_RD_PNTR_WIDTH(5),
+    .C_RD_PNTR_WIDTH(7),
     .C_RDCH_TYPE(0),
     .C_REG_SLICE_MODE_AXIS(0),
     .C_REG_SLICE_MODE_RACH(0),
@@ -234,8 +234,8 @@ output prog_full;
     .C_WACH_TYPE(0),
     .C_WDCH_TYPE(0),
     .C_WR_ACK_LOW(0),
-    .C_WR_DATA_COUNT_WIDTH(8),
-    .C_WR_DEPTH(256),
+    .C_WR_DATA_COUNT_WIDTH(10),
+    .C_WR_DEPTH(1024),
     .C_WR_DEPTH_AXIS(1024),
     .C_WR_DEPTH_RACH(16),
     .C_WR_DEPTH_RDCH(1024),
@@ -243,7 +243,7 @@ output prog_full;
     .C_WR_DEPTH_WDCH(1024),
     .C_WR_DEPTH_WRCH(16),
     .C_WR_FREQ(1),
-    .C_WR_PNTR_WIDTH(8),
+    .C_WR_PNTR_WIDTH(10),
     .C_WR_PNTR_WIDTH_AXIS(10),
     .C_WR_PNTR_WIDTH_RACH(4),
     .C_WR_PNTR_WIDTH_RDCH(10),
@@ -263,7 +263,7 @@ output prog_full;
     .DOUT(dout),
     .FULL(full),
     .EMPTY(empty),
-    .PROG_FULL(prog_full),
+    .PROG_EMPTY(prog_empty),
     .BACKUP(),
     .BACKUP_MARKER(),
     .CLK(),
@@ -288,7 +288,7 @@ output prog_full;
     .DATA_COUNT(),
     .RD_DATA_COUNT(),
     .WR_DATA_COUNT(),
-    .PROG_EMPTY(),
+    .PROG_FULL(),
     .SBITERR(),
     .DBITERR(),
     .M_ACLK(),

@@ -87,9 +87,9 @@
 #NET SRAM* IOSTANDARD = LVCMOS33;
 #NET FLASH* IOSTANDARD = LVCMOS33;
 
-NET ROTARY_INCA LOC = AH30;
-NET ROTARY_INCB LOC = AG30;
-NET ROTARY* IOSTANDARD = SSTL18_II;
+#NET ROTARY_INCA LOC = AH30;
+#NET ROTARY_INCB LOC = AG30;
+#NET ROTARY* IOSTANDARD = SSTL18_II;
 
 #NET FPGA_SERIAL1_TX LOC = AG20;
 #NET FPGA_SERIAL1_RX LOC = AG15;
@@ -155,167 +155,180 @@ NET GPIO_SW_S LOC = V8;
 NET GPIO_SW_W LOC = AJ7;
 NET GPIO_SW_* IOSTANDARD = LVCMOS33;
 
-NET GPIO_DIP_SW<0> LOC=U25;
-NET GPIO_DIP_SW<1> LOC=AG27;
-NET GPIO_DIP_SW<2> LOC=AF25;
-NET GPIO_DIP_SW<3> LOC=AF26;
-NET GPIO_DIP_SW<4> LOC=AE27;
-NET GPIO_DIP_SW<5> LOC=AE26;
-NET GPIO_DIP_SW<6> LOC=AC25;
-NET GPIO_DIP_SW<7> LOC=AC24;
-NET GPIO_DIP_SW* IOSTANDARD = SSTL18_II;
+#NET GPIO_DIP_SW<0> LOC=U25;
+#NET GPIO_DIP_SW<1> LOC=AG27;
+#NET GPIO_DIP_SW<2> LOC=AF25;
+#NET GPIO_DIP_SW<3> LOC=AF26;
+#NET GPIO_DIP_SW<4> LOC=AE27;
+#NET GPIO_DIP_SW<5> LOC=AE26;
+#NET GPIO_DIP_SW<6> LOC=AC25;
+#NET GPIO_DIP_SW<7> LOC=AC24;
+#NET GPIO_DIP_SW* IOSTANDARD = SSTL18_II;
 
 NET GPIO_LED<0> LOC = H18;
-NET GPIO_LED<0> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<0> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<1> LOC = L18;
-NET GPIO_LED<1> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<1> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<2> LOC = G15;
-NET GPIO_LED<2> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<2> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<3> LOC = AD26;
-NET GPIO_LED<3> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<3> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<4> LOC = G16;
-NET GPIO_LED<4> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<4> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<5> LOC = AD25;
-NET GPIO_LED<5> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<5> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<6> LOC = AD24;
-NET GPIO_LED<6> IOSTANDARD = LVCMOS25;
+NET GPIO_LED<6> IOSTANDARD = SSTL18_II;
 NET GPIO_LED<7> LOC = AE24;
-NET GPIO_LED<7> IOSTANDARD = LVCMOS25;
-NET GPIO_LED_C LOC = E8;
-NET GPIO_LED_W LOC = AF23;
-NET GPIO_LED_E LOC = AG23;
-NET GPIO_LED_N LOC = AF13;
-NET GPIO_LED_S LOC = AG12;
-NET GPIO_LED_* IOSTANDARD = LVCMOS33;
+NET GPIO_LED<7> IOSTANDARD = SSTL18_II;
 
-#NET DDR2_D<0> LOC = AF30;
-#NET DDR2_D<1> LOC = AK31;
-#NET DDR2_D<2> LOC = AF31;
-#NET DDR2_D<3> LOC = AD30;
-#NET DDR2_D<4> LOC = AJ30;
-#NET DDR2_D<5> LOC = AF29;
-#NET DDR2_D<6> LOC = AD29;
-#NET DDR2_D<7> LOC = AE29;
-#NET DDR2_D<8> LOC = AH27;
-#NET DDR2_D<9> LOC = AF28;
-#NET DDR2_D<10> LOC = AH28;
-#NET DDR2_D<11> LOC = AA28;
-#NET DDR2_D<12> LOC = AG25;
-#NET DDR2_D<13> LOC = AJ26;
-#NET DDR2_D<14> LOC = AG28;
-#NET DDR2_D<15> LOC = AB28;
-#NET DDR2_D<16> LOC = AC28;
-#NET DDR2_D<17> LOC = AB25;
-#NET DDR2_D<18> LOC = AC27;
-#NET DDR2_D<19> LOC = AA26;
-#NET DDR2_D<20> LOC = AB26;
-#NET DDR2_D<21> LOC = AA24;
-#NET DDR2_D<22> LOC = AB27;
-#NET DDR2_D<23> LOC = AA25;
-#NET DDR2_D<24> LOC = AC29;
-#NET DDR2_D<25> LOC = AB30;
-#NET DDR2_D<26> LOC = W31;
-#NET DDR2_D<27> LOC = V30;
-#NET DDR2_D<28> LOC = AC30;
-#NET DDR2_D<29> LOC = W29;
-#NET DDR2_D<30> LOC = V27;
-#NET DDR2_D<31> LOC = W27;
-#NET DDR2_D<32> LOC = V29;
-#NET DDR2_D<33> LOC = Y27;
-#NET DDR2_D<34> LOC = Y26;
-#NET DDR2_D<35> LOC = W24;
-#NET DDR2_D<36> LOC = V28;
-#NET DDR2_D<37> LOC = W25;
-#NET DDR2_D<38> LOC = W26;
-#NET DDR2_D<39> LOC = V24;
-#NET DDR2_D<40> LOC = R24;
-#NET DDR2_D<41> LOC = P25;
-#NET DDR2_D<42> LOC = N24;
-#NET DDR2_D<43> LOC = P26;
-#NET DDR2_D<44> LOC = T24;
-#NET DDR2_D<45> LOC = N25;
-#NET DDR2_D<46> LOC = P27;
-#NET DDR2_D<47> LOC = N28;
-#NET DDR2_D<48> LOC = M28;
-#NET DDR2_D<49> LOC = L28;
-#NET DDR2_D<50> LOC = F25;
-#NET DDR2_D<51> LOC = H25;
-#NET DDR2_D<52> LOC = K27;
-#NET DDR2_D<53> LOC = K28;
-#NET DDR2_D<54> LOC = H24;
-#NET DDR2_D<55> LOC = G26;
-#NET DDR2_D<56> LOC = G25;
-#NET DDR2_D<57> LOC = M26;
-#NET DDR2_D<58> LOC = J24;
-#NET DDR2_D<59> LOC = L26;
-#NET DDR2_D<60> LOC = J27;
-#NET DDR2_D<61> LOC = M25;
-#NET DDR2_D<62> LOC = L25;
-#NET DDR2_D<63> LOC = L24;
-#NET DDR2_D* IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_A<0> LOC = L30;
-#NET DDR2_A<1> LOC = M30;
-#NET DDR2_A<2> LOC = N29;
-#NET DDR2_A<3> LOC = P29;
-#NET DDR2_A<4> LOC = K31;
-#NET DDR2_A<5> LOC = L31;
-#NET DDR2_A<6> LOC = P31;
-#NET DDR2_A<7> LOC = P30;
-#NET DDR2_A<8> LOC = M31;
-#NET DDR2_A<9> LOC = R28;
-#NET DDR2_A<10> LOC = J31;
-#NET DDR2_A<11> LOC = R29;
-#NET DDR2_A<12> LOC = T31;
-#NET DDR2_A* IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_CLK_P<0> LOC = AK29;
-#NET DDR2_CLK_N<0> LOC = AJ29;
-#NET DDR2_CLK_P<1> LOC = E28;
-#NET DDR2_CLK_N<1> LOC = F28;
-#NET DDR2_CLK* IOSTANDARD = DIFF_SSTL18_II;
-#
-#NET DDR2_CE<0> LOC = T28;
-#NET DDR2_CE<1> LOC = U30;
-#NET DDR2_CE* IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_CS_B<0> LOC = L29;
+#NET GPIO_LED_C LOC = E8;
+#NET GPIO_LED_W LOC = AF23;
+#NET GPIO_LED_E LOC = AG23;
+#NET GPIO_LED_N LOC = AF13;
+#NET GPIO_LED_S LOC = AG12;
+#NET GPIO_LED_* IOSTANDARD = LVCMOS33;
+
+NET DDR2_D<0> LOC = AF30;
+NET DDR2_D<1> LOC = AK31;
+NET DDR2_D<2> LOC = AF31;
+NET DDR2_D<3> LOC = AD30;
+NET DDR2_D<4> LOC = AJ30;
+NET DDR2_D<5> LOC = AF29;
+NET DDR2_D<6> LOC = AD29;
+NET DDR2_D<7> LOC = AE29;
+NET DDR2_D<8> LOC = AH27;
+NET DDR2_D<9> LOC = AF28;
+NET DDR2_D<10> LOC = AH28;
+NET DDR2_D<11> LOC = AA28;
+NET DDR2_D<12> LOC = AG25;
+NET DDR2_D<13> LOC = AJ26;
+NET DDR2_D<14> LOC = AG28;
+NET DDR2_D<15> LOC = AB28;
+NET DDR2_D<16> LOC = AC28;
+NET DDR2_D<17> LOC = AB25;
+NET DDR2_D<18> LOC = AC27;
+NET DDR2_D<19> LOC = AA26;
+NET DDR2_D<20> LOC = AB26;
+NET DDR2_D<21> LOC = AA24;
+NET DDR2_D<22> LOC = AB27;
+NET DDR2_D<23> LOC = AA25;
+NET DDR2_D<24> LOC = AC29;
+NET DDR2_D<25> LOC = AB30;
+NET DDR2_D<26> LOC = W31;
+NET DDR2_D<27> LOC = V30;
+NET DDR2_D<28> LOC = AC30;
+NET DDR2_D<29> LOC = W29;
+NET DDR2_D<30> LOC = V27;
+NET DDR2_D<31> LOC = W27;
+NET DDR2_D<32> LOC = V29;
+NET DDR2_D<33> LOC = Y27;
+NET DDR2_D<34> LOC = Y26;
+NET DDR2_D<35> LOC = W24;
+NET DDR2_D<36> LOC = V28;
+NET DDR2_D<37> LOC = W25;
+NET DDR2_D<38> LOC = W26;
+NET DDR2_D<39> LOC = V24;
+NET DDR2_D<40> LOC = R24;
+NET DDR2_D<41> LOC = P25;
+NET DDR2_D<42> LOC = N24;
+NET DDR2_D<43> LOC = P26;
+NET DDR2_D<44> LOC = T24;
+NET DDR2_D<45> LOC = N25;
+NET DDR2_D<46> LOC = P27;
+NET DDR2_D<47> LOC = N28;
+NET DDR2_D<48> LOC = M28;
+NET DDR2_D<49> LOC = L28;
+NET DDR2_D<50> LOC = F25;
+NET DDR2_D<51> LOC = H25;
+NET DDR2_D<52> LOC = K27;
+NET DDR2_D<53> LOC = K28;
+NET DDR2_D<54> LOC = H24;
+NET DDR2_D<55> LOC = G26;
+NET DDR2_D<56> LOC = G25;
+NET DDR2_D<57> LOC = M26;
+NET DDR2_D<58> LOC = J24;
+NET DDR2_D<59> LOC = L26;
+NET DDR2_D<60> LOC = J27;
+NET DDR2_D<61> LOC = M25;
+NET DDR2_D<62> LOC = L25;
+NET DDR2_D<63> LOC = L24;
+NET DDR2_D* IOSTANDARD = SSTL18_II_DCI;
+
+NET DDR2_DM<0> LOC = AJ31;
+NET DDR2_DM<1> LOC = AE28;
+NET DDR2_DM<2> LOC = Y24;
+NET DDR2_DM<3> LOC = Y31;
+NET DDR2_DM<4> LOC = V25;
+NET DDR2_DM<5> LOC = P24;
+NET DDR2_DM<6> LOC = F26;
+NET DDR2_DM<7> LOC = J25;
+NET DDR2_DM* IOSTANDARD = SSTL18_II_DCI;
+
+NET DDR2_A<0> LOC = L30;
+NET DDR2_A<1> LOC = M30;
+NET DDR2_A<2> LOC = N29;
+NET DDR2_A<3> LOC = P29;
+NET DDR2_A<4> LOC = K31;
+NET DDR2_A<5> LOC = L31;
+NET DDR2_A<6> LOC = P31;
+NET DDR2_A<7> LOC = P30;
+NET DDR2_A<8> LOC = M31;
+NET DDR2_A<9> LOC = R28;
+NET DDR2_A<10> LOC = J31;
+NET DDR2_A<11> LOC = R29;
+NET DDR2_A<12> LOC = T31;
+NET DDR2_A* IOSTANDARD = SSTL18_II;
+
+NET DDR2_CLK_P<0> LOC = AK29;
+NET DDR2_CLK_N<0> LOC = AJ29;
+NET DDR2_CLK_P<1> LOC = E28;
+NET DDR2_CLK_N<1> LOC = F28;
+NET DDR2_CLK_P* IOSTANDARD = DIFF_SSTL18_II;
+NET DDR2_CLK_N* IOSTANDARD = DIFF_SSTL18_II;
+
+NET DDR2_CS_B<0> LOC = L29;
 #NET DDR2_CS_B<1> LOC = J29;
-#NET DDR2_CS_B* IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_ODT<0> LOC = F31;
+NET DDR2_CS_B* IOSTANDARD = SSTL18_II;
+
+NET DDR2_CKE<0> LOC = T28;
+#NET DDR2_CKE<1> LOC = U30;
+NET DDR2_CKE* IOSTANDARD = SSTL18_II;
+
+NET DDR2_ODT<0> LOC = F31;
 #NET DDR2_ODT<1> LOC = F30;
-#NET DDR2_ODT* IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_RAS_B LOC = H30;
-#NET DDR2_RAS_B IOSTANDARD = SSTL18_II;
-#NET DDR2_CAS_B LOC = E31;
-#NET DDR2_CAS_B IOSTANDARD = SSTL18_II;
-#NET DDR2_WE_B LOC = K29;
-#NET DDR2_WE_B IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_BA<0> LOC = G31;
-#NET DDR2_BA<1> LOC = J30;
-#NET DDR2_BA* IOSTANDARD = SSTL18_II;
-#
-#NET DDR2_DQS_P<0> LOC = AA29;
-#NET DDR2_DQS_N<0> LOC = AA30;
-#NET DDR2_DQS_P<1> LOC = AK28;
-#NET DDR2_DQS_N<1> LOC = AK27;
-#NET DDR2_DQS_P<2> LOC = AK26;
-#NET DDR2_DQS_N<2> LOC = AJ27;
-#NET DDR2_DQS_P<3> LOC = AB31;
-#NET DDR2_DQS_N<3> LOC = AA31;
-#NET DDR2_DQS_P<4> LOC = Y28;
-#NET DDR2_DQS_N<4> LOC = Y29;
-#NET DDR2_DQS_P<5> LOC = E26;
-#NET DDR2_DQS_N<5> LOC = E27;
-#NET DDR2_DQS_P<6> LOC = H28;
-#NET DDR2_DQS_N<6> LOC = G28;
-#NET DDR2_DQS_P<7> LOC = G27;
-#NET DDR2_DQS_N<7> LOC = H27;
-#NET DDR2_DQS* IOSTANDARD = DIFF_SSTL18_II;
-#
+NET DDR2_ODT* IOSTANDARD = SSTL18_II;
+
+NET DDR2_RAS_B LOC = H30;
+NET DDR2_RAS_B IOSTANDARD = SSTL18_II;
+NET DDR2_CAS_B LOC = E31;
+NET DDR2_CAS_B IOSTANDARD = SSTL18_II;
+NET DDR2_WE_B LOC = K29;
+NET DDR2_WE_B IOSTANDARD = SSTL18_II;
+
+NET DDR2_BA<0> LOC = G31;
+NET DDR2_BA<1> LOC = J30;
+NET DDR2_BA* IOSTANDARD = SSTL18_II;
+
+NET DDR2_DQS_P<0> LOC = AA29;
+NET DDR2_DQS_N<0> LOC = AA30;
+NET DDR2_DQS_P<1> LOC = AK28;
+NET DDR2_DQS_N<1> LOC = AK27;
+NET DDR2_DQS_P<2> LOC = AK26;
+NET DDR2_DQS_N<2> LOC = AJ27;
+NET DDR2_DQS_P<3> LOC = AB31;
+NET DDR2_DQS_N<3> LOC = AA31;
+NET DDR2_DQS_P<4> LOC = Y28;
+NET DDR2_DQS_N<4> LOC = Y29;
+NET DDR2_DQS_P<5> LOC = E26;
+NET DDR2_DQS_N<5> LOC = E27;
+NET DDR2_DQS_P<6> LOC = H28;
+NET DDR2_DQS_N<6> LOC = G28;
+NET DDR2_DQS_P<7> LOC = G27;
+NET DDR2_DQS_N<7> LOC = H27;
+NET DDR2_DQS_P* IOSTANDARD = DIFF_SSTL18_II_DCI;
+NET DDR2_DQS_N* IOSTANDARD = DIFF_SSTL18_II_DCI;
+
 #NET DDR2_SCL LOC = E29;
 #NET DDR2_SCL IOSTANDARD = SSTL18_II;
 #NET DDR2_SDA LOC = F29;
@@ -382,11 +395,155 @@ NET FPGA_CPU_RESET_B IOSTANDARD = LVCMOS33;
 NET CLK_33MHZ_FPGA LOC = AH17;
 NET CLK_33MHZ_FPGA IOSTANDARD = LVCMOS33;
 
-NET CLK_27MHZ_FPGA LOC = AG18;
-NET CLK_27MHZ_FPGA IOSTANDARD = LVCMOS33;
+#NET CLK_27MHZ_FPGA LOC = AG18;
+#NET CLK_27MHZ_FPGA IOSTANDARD = LVCMOS33;
 
-NET CLK_33MHZ_FPGA TNM_NET = CLK_33MHZ_FPGA;
-TIMESPEC TS_33M_CLK = PERIOD CLK_33MHZ_FPGA 30.3 ns HIGH 50%;
+#NET CLK_33MHZ_FPGA TNM_NET = CLK_33MHZ_FPGA;
+#TIMESPEC TS_33M_CLK = PERIOD CLK_33MHZ_FPGA 30.0 ns HIGH 50%;
 
-NET CLK_27MHZ_FPGA TNM_NET = CLK_27MHZ_FPGA;
-TIMESPEC TS_27M_CLK = PERIOD CLK_27MHZ_FPGA 37.0 ns HIGH 50%;
+#NET CLK_27MHZ_FPGA TNM_NET = CLK_27MHZ_FPGA;
+#TIMESPEC TS_27M_CLK = PERIOD CLK_27MHZ_FPGA 37.0 ns HIGH 50%;
+
+
+#NET "clk_125" TNM_NET = "SYS_clk0";
+#TIMESPEC "TS_SYS_clk0" = PERIOD "SYS_clk0" 8 ns HIGH 50 %;
+#
+#NET "clk_125_90" TNM_NET = "SYS_clk90";
+#TIMESPEC "TS_SYS_clk90" = PERIOD "SYS_clk90" "TS_SYS_clk0" PHASE 2 ns HIGH 50 %;
+#
+#NET "clk_62p5" TNM_NET = "SYS_clkdiv0";
+#TIMESPEC "TS_SYS_clkdiv0" = PERIOD "SYS_clkdiv0" "TS_SYS_clk0" * 2 HIGH 50 %;
+#
+#NET "clk_200" TNM_NET = "SYS_clk200";
+#TIMESPEC "TS_SYS_clk200" = PERIOD "SYS_clk200" 5 ns HIGH 50 %;
+
+###############################################################################
+# Define multicycle paths - these paths may take longer because additional
+# time allowed for logic to settle in calibration/initialization FSM
+###############################################################################
+
+## MIG 2.1: Eliminate Timegroup definitions for CLK0, and CLK90. Instead trace
+##          multicycle paths from originating flip-flop to ANY destination
+##          flip-flop (or in some cases, it can also be a BRAM)
+## MUX Select for either rising/falling CLK0 for 2nd stage read capture
+#INST "*/u_phy_calib/gen_rd_data_sel*.u_ff_rd_data_sel" TNM = "TNM_RD_DATA_SEL";
+#TIMESPEC "TS_MC_RD_DATA_SEL" = FROM "TNM_RD_DATA_SEL" TO FFS
+#"TS_SYS_clk0" * 4;
+## MUX select for read data - optional delay on data to account for byte skews
+#INST "*/u_usr_rd/gen_rden_sel_mux*.u_ff_rden_sel_mux" TNM = "TNM_RDEN_SEL_MUX";
+#TIMESPEC "TS_MC_RDEN_SEL_MUX" = FROM "TNM_RDEN_SEL_MUX" TO FFS
+#"TS_SYS_clk0" * 4;
+## Calibration/Initialization complete status flag (for PHY logic only) - can
+## be used to drive both flip-flops and BRAMs
+#INST "*/u_phy_init/u_ff_phy_init_data_sel" TNM = "TNM_PHY_INIT_DATA_SEL";
+#TIMESPEC "TS_MC_PHY_INIT_DATA_SEL_0" = FROM "TNM_PHY_INIT_DATA_SEL" TO FFS
+#"TS_SYS_clk0" * 4;
+## The RAM path is only used in cases where Write Latency (Additive Latency + 
+## (CAS Latency - 1) + (1 in case of RDIMM)) is 2 or below. So these constraints are 
+## valid for CAS Latency = 3, Additive Latency = 0 and selected part is not RDIMM. 
+## If Write Latency is higher than 3, then a warning will appear in PAR, 
+## and the constraint can be ignored as this path does not exist. RAM constraint 
+## can be safely removed if the warning is not to be displayed.
+#TIMESPEC "TS_MC_PHY_INIT_DATA_SEL_90" = FROM "TNM_PHY_INIT_DATA_SEL" TO RAMS
+#"TS_SYS_clk0" * 4;
+## Select (address) bits for SRL32 shift registers used in stage3/stage4
+## calibration
+#INST "*/u_phy_calib/gen_gate_dly*.u_ff_gate_dly" TNM = "TNM_GATE_DLY";
+#TIMESPEC "TS_MC_GATE_DLY" = FROM "TNM_GATE_DLY" TO FFS "TS_SYS_clk0" * 4;
+#
+#INST "*/u_phy_calib/gen_rden_dly*.u_ff_rden_dly" TNM = "TNM_RDEN_DLY";
+#TIMESPEC "TS_MC_RDEN_DLY" = FROM "TNM_RDEN_DLY" TO FFS "TS_SYS_clk0" * 4;
+#
+#INST "*/u_phy_calib/gen_cal_rden_dly*.u_ff_cal_rden_dly"
+#  TNM = "TNM_CAL_RDEN_DLY";
+#TIMESPEC "TS_MC_CAL_RDEN_DLY" = FROM "TNM_CAL_RDEN_DLY" TO FFS
+#"TS_SYS_clk0" * 4;
+################################################################################ 
+##The following constraint is added to prevent (false) hold time violations on
+##the data path from stage1 to stage2 capture flops.  Stage1 flops are clocked by 
+##the delayed DQS and stage2 flops are clocked by the clk0 clock. Placing a TIG 
+##on the DQ IDDR capture flop instance to achieve this is acceptable because timing
+##is guaranteed through the use of separate Predictable IP constraints. These
+##violations are reported when anunconstrained path report is run.	  
+################################################################################ 
+#INST "*/gen_dq[*].u_iob_dq/gen*.u_iddr_dq" TIG ;
+################################################################################
+## DQS Read Post amble Glitch Squelch circuit related constraints
+################################################################################
+#
+################################################################################
+## LOC placement of DQS-squelch related IDDR and IDELAY elements
+## Each circuit can be located at any of the following locations:
+##  1. Unused "N"-side of DQS differential pair I/O
+##  2. DM data mask (output only, input side is free for use)
+##  3. Any output-only site
+################################################################################
+#
+################################################################################
+##The following constraint is added to avoid the HOLD violations in the trace report
+##when run for unconstrained paths.These two FF groups will be clocked by two different
+## clocks and hence there should be no timing analysis performed on this path.
+################################################################################
+#INST "*/u_mem_if_top/u_phy_top/u_phy_io/u_phy_calib/gen_gate[*].u_en_dqs_ff" TNM = EN_DQS_FF;
+#TIMESPEC TS_FROM_EN_DQS_FF_TO_DQ_CE_FF = FROM EN_DQS_FF TO TNM_DQ_CE_IDDR 3.85 ns DATAPATHONLY;
+#
+#INST "*/gen_dqs[0].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y56";
+#INST "*/gen_dqs[0].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y56";
+#INST "*/gen_dqs[1].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y18";
+#INST "*/gen_dqs[1].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y18";
+#INST "*/gen_dqs[2].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y22";
+#INST "*/gen_dqs[2].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y22";
+#INST "*/gen_dqs[3].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y60";
+#INST "*/gen_dqs[3].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y60";
+#INST "*/gen_dqs[4].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y62";
+#INST "*/gen_dqs[4].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y62";
+#INST "*/gen_dqs[5].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y216";
+#INST "*/gen_dqs[5].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y216";
+#INST "*/gen_dqs[6].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y220";
+#INST "*/gen_dqs[6].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y220";
+#INST "*/gen_dqs[7].u_iob_dqs/u_iddr_dq_ce"  LOC = "ILOGIC_X0Y222";
+#INST "*/gen_dqs[7].u_iob_dqs/u_iodelay_dq_ce"  LOC = "IODELAY_X0Y222";
+#
+################################################################################
+## LOC and timing constraints for flop driving DQS CE enable signal
+## from fabric logic. Even though the absolute delay on this path is
+## calibrated out (when synchronizing this output to DQS), the delay
+## should still be kept as low as possible to reduce post-calibration
+## voltage/temp variations - these are roughly proportional to the
+## absolute delay of the path.                                    
+##	The following code has been commented for V5 as the predictable IP will take 
+##	care of placement of these flops by meeting the MAXDELAY requirement.  
+##	These constraints will be removed in the next release.  
+################################################################################
+#
+#INST "*/u_phy_calib/gen_gate[0].u_en_dqs_ff"  LOC = SLICE_X0Y28;
+#INST "*/u_phy_calib/gen_gate[1].u_en_dqs_ff"  LOC = SLICE_X0Y9;
+#INST "*/u_phy_calib/gen_gate[2].u_en_dqs_ff"  LOC = SLICE_X0Y11;
+#INST "*/u_phy_calib/gen_gate[3].u_en_dqs_ff"  LOC = SLICE_X0Y30;
+#INST "*/u_phy_calib/gen_gate[4].u_en_dqs_ff"  LOC = SLICE_X0Y31;
+#INST "*/u_phy_calib/gen_gate[5].u_en_dqs_ff"  LOC = SLICE_X0Y108;
+#INST "*/u_phy_calib/gen_gate[6].u_en_dqs_ff"  LOC = SLICE_X0Y110;
+#INST "*/u_phy_calib/gen_gate[7].u_en_dqs_ff"  LOC = SLICE_X0Y111;
+#
+## Control for DQS gate - from fabric flop. Prevent "runaway" delay -
+## two parts to this path: (1) from fabric flop to IDELAY, (2) from
+## IDELAY to asynchronous reset of IDDR that drives the DQ CE's
+## This can be relaxed by the user for lower frequencies:
+## 300MHz = 850ps, 267MHz = 900ps. At 200MHz = 950ps.
+## In general PAR should be able to route this
+## within 900ps over all speed grades.
+#NET "*/u_phy_io/en_dqs[*]" MAXDELAY = 600 ps;
+#NET "*/u_phy_io/gen_dqs*.u_iob_dqs/en_dqs_sync" MAXDELAY = 800 ps;
+#
+################################################################################
+## "Half-cycle" path constraint from IOB flip-flop to CE pin for all DQ IDDR's
+## for DQS Read Post amble Glitch Squelch circuit
+################################################################################
+#
+## Max delay from output of IOB flip-flop to CE input of DQ IDDRs =
+##  tRPST + some slack where slack account for rise-time of DQS on board.
+##  For now assume slack = 0.400ns (based on initial SPICE simulations,
+##  assumes use of ODT), so time = 0.4*Tcyc + 0.40ns = 1.6ns @333MHz
+#INST "*/gen_dqs[*].u_iob_dqs/u_iddr_dq_ce" TNM = "TNM_DQ_CE_IDDR";
+#INST "*/gen_dq[*].u_iob_dq/gen_stg2_*.u_iddr_dq" TNM = "TNM_DQS_FLOPS";
+#TIMESPEC "TS_DQ_CE" = FROM "TNM_DQ_CE_IDDR" TO "TNM_DQS_FLOPS" 3.6 ns;

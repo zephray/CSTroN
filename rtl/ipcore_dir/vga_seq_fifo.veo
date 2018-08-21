@@ -57,22 +57,22 @@
 // (in parentheses) to your own signal names.
 
 //----------- Begin Cut here for INSTANTIATION Template ---// INST_TAG
-frc_lcdc_fifo your_instance_name (
+vga_seq_fifo your_instance_name (
   .rst(rst), // input rst
   .wr_clk(wr_clk), // input wr_clk
   .rd_clk(rd_clk), // input rd_clk
-  .din(din), // input [5 : 0] din
+  .din(din), // input [15 : 0] din
   .wr_en(wr_en), // input wr_en
   .rd_en(rd_en), // input rd_en
-  .dout(dout), // output [47 : 0] dout
+  .dout(dout), // output [127 : 0] dout
   .full(full), // output full
   .empty(empty), // output empty
-  .prog_full(prog_full) // output prog_full
+  .prog_empty(prog_empty) // output prog_empty
 );
 // INST_TAG_END ------ End INSTANTIATION Template ---------
 
-// You must compile the wrapper file frc_lcdc_fifo.v when simulating
-// the core, frc_lcdc_fifo. When compiling the wrapper file, be sure to
+// You must compile the wrapper file vga_seq_fifo.v when simulating
+// the core, vga_seq_fifo. When compiling the wrapper file, be sure to
 // reference the XilinxCoreLib Verilog simulation library. For detailed
 // instructions, please refer to the "CORE Generator Help".
 
