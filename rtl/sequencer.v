@@ -52,14 +52,18 @@ module sequencer(
     output reg lcdc_vsync,
     // VGA FIFO Master Port
     output vga_rd_clk,
-    output vga_rd_en,
+    output reg vga_rd_en,
     input vga_rd_empty,
     input [127:0] vga_rd_data,
     // VGA VSYNC input
     input vga_vsync,
     // Debug
     output phy_init_done,
-    output [1:0] dbg_state
+    output [1:0] dbg_state,
+    output af_wren,
+    output wdf_wren,
+    output reach_end,
+    output wr_buf
     );
     
     wire rst;
@@ -142,7 +146,7 @@ module sequencer(
     reg  [2:0]   app_af_cmd;         // 3'b000 for Write; 3'b001 for Read
     wire [127:0] rd_data_fifo_out;   // Read Data from Memory
     reg  [127:0] app_wdf_data;       // User Input Data
-    reg  [15:0]   app_wdf_mask_data;  // Usser Masking Data
+    reg  [15:0]  app_wdf_mask_data;  // Usser Masking Data
 
     localparam MIG_CMD_RD = 3'b001;
     localparam MIG_CMD_WR = 3'b000;
@@ -280,6 +284,9 @@ module sequencer(
     assign frc_wr_clk = ddr_clk;
     assign frc_wr_en = rd_data_valid;
     assign frc_wr_data = rd_data_fifo_out;
+    
+    // VGA read port
+    assign vga_rd_clk = ~ddr_clk;
 
     // Sequencer Logic !
     // |_VGA\FRC_|_Full_|_Normal_|_Empty_|
@@ -299,7 +306,14 @@ module sequencer(
     localparam S_IDLE = 3'd0;
     localparam S_NORMAL = 3'd1;
     localparam S_INPUTONLY = 3'd2; // this is deprecated. Pixel fetch should be stopped after one frame under any cases.
-    localparam S_DDRWR = 3'd3;
+    localparam S_DDRWR_1 = 3'd3;
+    localparam S_DDRWR_2 = 3'd4;
+    localparam S_DDRWR_3 = 3'd5;
+    
+    localparam SCR_SIZE = 640 * 480 * 2; // In bytes
+    localparam SCR_SIZE_HALF = SCR_SIZE / 2;
+    localparam SCR_SIZE_IN_OCT = SCR_SIZE / 8;
+    localparam SCR_SIZE_HALF_IN_QUAD = SCR_SIZE_IN_OCT;
     reg [2:0] state;
     reg [2:0] next_state;
     // Dual buffering
@@ -315,17 +329,17 @@ module sequencer(
     wire [30:0] wr_pointer = {wr_buf_addr_base[30:20], wr_position[19:0]};
     wire [30:0] rd_pointer = {rd_buf_addr_base[30:20], rd_position[19:0]};
     reg wr_upper_lower_select = 0; // 0 for upper half screen, 1 for lower half screen
-    wire wr_upper_lower_select_next = (wr_position == (20'd307200 - 8)) ? (~wr_upper_lower_select) : (wr_upper_lower_select);
-    wire [19:0] wr_position_next = (wr_position == (20'd307200 - 8)) ? (20'd0) : (wr_position + 20'd8);
-    wire rd_reach_end = (rd_position == (20'd614400)) ? 1'b1 : 1'b0;
-    wire [19:0] rd_position_next = (rd_reach_end) ? (rd_position) : (rd_position + 20'd8);
+    wire wr_upper_lower_select_next = (wr_position == (SCR_SIZE_HALF_IN_QUAD - 4)) ? (~wr_upper_lower_select) : (wr_upper_lower_select);
+    wire [19:0] wr_position_next = (wr_position == (SCR_SIZE_HALF_IN_QUAD - 4)) ? (20'd0) : (wr_position + 20'd4);
+    wire rd_reach_end = (rd_position == (SCR_SIZE_IN_OCT)) ? 1'b1 : 1'b0;
+    wire [19:0] rd_position_next = (rd_reach_end) ? (rd_position) : (rd_position + 20'd4);
     // Interlacing
     wire [127:0] wr_data_upper_1 = {vga_rd_data[127:112], 16'b0, vga_rd_data[111:96], 16'b0, vga_rd_data[95:80], 16'b0, vga_rd_data[79:64], 16'b0};
     wire [127:0] wr_data_upper_2 = {vga_rd_data[63:48], 16'b0, vga_rd_data[47:32], 16'b0, vga_rd_data[31:16], 16'b0, vga_rd_data[15:0], 16'b0};
     wire [127:0] wr_data_lower_1 = {16'b0, vga_rd_data[127:112], 16'b0, vga_rd_data[111:96], 16'b0, vga_rd_data[95:80], 16'b0, vga_rd_data[79:64]};
     wire [127:0] wr_data_lower_2 = {16'b0, vga_rd_data[63:48], 16'b0, vga_rd_data[47:32], 16'b0, vga_rd_data[31:16], 16'b0, vga_rd_data[15:0]};
-    wire [15:0] wr_mask_upper = 16'b1010101010101010;
-    wire [15:0] wr_mask_lower = 16'b0101010101010101;
+    wire [15:0] wr_mask_upper = 16'b0011001100110011;
+    wire [15:0] wr_mask_lower = 16'b1100110011001100;
     wire [127:0] wr_data_1 = (wr_upper_lower_select) ? (wr_data_lower_1) : (wr_data_upper_1);
     wire [127:0] wr_data_2 = (wr_upper_lower_select) ? (wr_data_lower_2) : (wr_data_upper_2);
     wire [15:0] wr_mask = (wr_upper_lower_select) ? (wr_mask_lower) : (wr_mask_upper);
@@ -335,6 +349,8 @@ module sequencer(
     reg [19:0] ticks_since_last_cstn_frame;
     reg [22:0] last_sync_duration;
     wire [19:0] cstn_vsync_threshold = last_sync_duration[22:2];
+    reg sync_vsync_1;
+    reg sync_vsync_2;
  
     always @(posedge ddr_clk) begin
         if (ddr_rst) begin
@@ -347,24 +363,28 @@ module sequencer(
             last_sync_duration <= 23'd2000000; 
             ticks_since_last_cstn_frame <= 23'd0;
             ticks_since_last_sync <= 23'd0;
-            last_vsync <= 1'b0;
+            //last_vsync <= 1'b0;
             lcdc_vsync <= 1'b1;
         end
         else begin
+            sync_vsync_1 <= vga_vsync;
+            sync_vsync_2 <= sync_vsync_1;
             case (state)
                 S_IDLE: begin
                     //?
                     state <= S_IDLE;
                 end
                 S_NORMAL: begin
+                    last_vsync <= sync_vsync_2;
                     // Check if there is incoming sync
-                    if ((last_vsync == 1'b0)&&(vga_vsync == 1'b1)) begin
+                    if ((last_vsync == 1'b0)&&(sync_vsync_2 == 1'b1)) begin
                         // VSYNC
                         last_sync_duration <= ticks_since_last_sync;
                         ticks_since_last_sync <= 1'b0;
                         // Switch Buffer
                         wr_buf_sel <= ~wr_buf_sel;
                         wr_position <= 0;
+                        wr_upper_lower_select <= 0;
                         // CSTN Vsync
                         ticks_since_last_cstn_frame <= 1'b0;
                         rd_position <= 0;
@@ -377,7 +397,8 @@ module sequencer(
                             ticks_since_last_cstn_frame <= ticks_since_last_cstn_frame + 1'd1;
                             if (ticks_since_last_cstn_frame > 19'd200000)
                                 lcdc_vsync <= 1'b0;
-                        end else begin
+                        end 
+                        else begin
                             // CSTN VSYNC
                             ticks_since_last_cstn_frame <= 1'b0;
                             rd_position <= 0;
@@ -389,14 +410,13 @@ module sequencer(
                             // To WR to the DRAM
                             if ((!vga_rd_empty) && (!app_wdf_afull)) begin
                                 // Have incoming data.
-                                // This cycle would be a writing cycle.
-                                app_af_cmd <= MIG_CMD_WR;
-                                app_af_wren <= 1'b1;
-                                app_af_addr <= wr_pointer;
-                                app_wdf_data <= wr_data_1;
-                                app_wdf_mask_data <= wr_mask;
-                                app_wdf_wren <= 1'b1;
-                                state <= S_DDRWR;
+                                // Due to the delay of FIFO, this would last for  clocks:
+                                // Clk1 - Set EN high
+                                // Clk2 - FIFO received EN, no data yet, Set EN low
+                                // Clk3 - data in, DDRWR clk1
+                                // Clk4 - DDRWR clk2, 4clks for 128bits data, not too bad
+                                vga_rd_en <= 1'b1;
+                                state <= S_DDRWR_1;
                             end
                             else if ((!frc_wr_almost_full) && (!rd_reach_end)) begin
                                 app_af_cmd <= MIG_CMD_RD;
@@ -419,17 +439,35 @@ module sequencer(
                             state <= S_NORMAL;
                         end
                     end
-                    last_vsync <= vga_vsync;
                 end
-                S_DDRWR: begin
+                S_DDRWR_1: begin
+                    state <= S_DDRWR_2;
+                    vga_rd_en <= 1'b0;
+                end
+                S_DDRWR_2: begin
+                    vga_rd_en <= 1'b0;
+                    app_af_cmd <= MIG_CMD_WR;
+                    app_af_wren <= 1'b1;
+                    app_af_addr <= wr_pointer;
+                    app_wdf_data <= wr_data_1;
+                    app_wdf_mask_data <= wr_mask;
+                    //app_wdf_data <= 128'b0;
+                    //app_wdf_mask_data <= 16'hFFFF;
+                    app_wdf_wren <= 1'b1;
+                    state <= S_DDRWR_3;
+                end
+                S_DDRWR_3: begin
+                    vga_rd_en <= 1'b0;
                     // Update data on 2nd writing clock
                     app_af_cmd <= MIG_CMD_WR;
                     app_af_wren <= 1'b0;
                     app_wdf_data <= wr_data_2;
                     app_wdf_mask_data <= wr_mask;
+                    //app_wdf_data <= 128'b0;
+                    //app_wdf_mask_data <= 16'hFFFF;
                     app_wdf_wren <= 1'b1;
                     wr_position <= wr_position_next;
-                    wr_upper_lower_select <= wr_upper_lower_select;
+                    wr_upper_lower_select <= wr_upper_lower_select_next;
                     state <= S_NORMAL;
                 end
             endcase
@@ -437,5 +475,9 @@ module sequencer(
     end
     
     assign dbg_state[1:0] = state[1:0];
+    assign af_wren = app_af_wren;
+    assign wdf_wren = app_wdf_wren;
+    assign reach_end = rd_reach_end;
+    assign wr_buf = wr_buf_sel;
    
 endmodule
