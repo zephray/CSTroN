@@ -49,6 +49,7 @@ module sequencer(
     output [127:0] frc_wr_data,
     input frc_wr_almost_full, // when there is less than 32 slots available (DDR latency up to 28 clocks) 
     // LCDC VSYNC output
+    output reg frc_vsync,
     output reg lcdc_vsync,
     // VGA FIFO Master Port
     output vga_rd_clk,
@@ -57,7 +58,12 @@ module sequencer(
     input [127:0] vga_rd_data,
     // VGA VSYNC input
     input vga_vsync,
+    // FIFO reset output
+    output reg fifo_input_reset,
+    output reg fifo_output_reset,
     // Debug
+    input image_hold,
+    input write_hold,
     output phy_init_done,
     output [1:0] dbg_state,
     output af_wren,
@@ -286,7 +292,7 @@ module sequencer(
     assign frc_wr_data = rd_data_fifo_out;
     
     // VGA read port
-    assign vga_rd_clk = ~ddr_clk;
+    assign vga_rd_clk = ddr_clk;
 
     // Sequencer Logic !
     // |_VGA\FRC_|_Full_|_Normal_|_Empty_|
@@ -364,7 +370,11 @@ module sequencer(
             ticks_since_last_cstn_frame <= 23'd0;
             ticks_since_last_sync <= 23'd0;
             //last_vsync <= 1'b0;
-            lcdc_vsync <= 1'b1;
+            lcdc_vsync <= 1'b0;
+            frc_vsync <= 1'b1;
+            fifo_input_reset <= 1'b0;
+            fifo_output_reset <= 1'b0;
+            vga_rd_en <= 1'b0;
         end
         else begin
             sync_vsync_1 <= vga_vsync;
@@ -381,28 +391,44 @@ module sequencer(
                         // VSYNC
                         last_sync_duration <= ticks_since_last_sync;
                         ticks_since_last_sync <= 1'b0;
+                        fifo_input_reset <= 1'b1;
                         // Switch Buffer
-                        wr_buf_sel <= ~wr_buf_sel;
+                        if (!image_hold)
+                            wr_buf_sel <= ~wr_buf_sel;
                         wr_position <= 0;
                         wr_upper_lower_select <= 0;
                         // CSTN Vsync
+                        fifo_output_reset <= 1'b1;
                         ticks_since_last_cstn_frame <= 1'b0;
                         rd_position <= 0;
-                        lcdc_vsync <= 1'b1;
+                        frc_vsync <= 1'b1;
+                        lcdc_vsync <= 1'b0;
                         state <= S_NORMAL;
+                        app_af_wren <= 1'b0;
+                        app_wdf_wren <= 1'b0;
                     end
                     else begin
                         ticks_since_last_sync <= ticks_since_last_sync + 1'd1;
+                        fifo_input_reset <= 1'b0;
                         if (ticks_since_last_cstn_frame != cstn_vsync_threshold) begin
                             ticks_since_last_cstn_frame <= ticks_since_last_cstn_frame + 1'd1;
-                            if (ticks_since_last_cstn_frame > 19'd200000)
+                            if (ticks_since_last_cstn_frame > 19'd200000) begin
                                 lcdc_vsync <= 1'b0;
+                                frc_vsync <= 1'b0;
+                            end
+                            else if (ticks_since_last_cstn_frame > 19'd2000) begin
+                                lcdc_vsync <= 1'b1;
+                                frc_vsync <= 1'b1;
+                            end
+                            fifo_output_reset <= 1'b0;
                         end 
                         else begin
                             // CSTN VSYNC
                             ticks_since_last_cstn_frame <= 1'b0;
                             rd_position <= 0;
-                            lcdc_vsync <= 1'b1;
+                            lcdc_vsync <= 1'b0;
+                            frc_vsync <= 1'b1;
+                            fifo_output_reset <= 1'b1;
                         end
                     
                         // Check if we can do anything...
@@ -415,8 +441,12 @@ module sequencer(
                                 // Clk2 - FIFO received EN, no data yet, Set EN low
                                 // Clk3 - data in, DDRWR clk1
                                 // Clk4 - DDRWR clk2, 4clks for 128bits data, not too bad
+                                app_af_wren <= 1'b0;
+                                app_wdf_wren <= 1'b0;
                                 vga_rd_en <= 1'b1;
-                                state <= S_DDRWR_1;
+                                if (!write_hold) begin
+                                    state <= S_DDRWR_1;
+                                end
                             end
                             else if ((!frc_wr_almost_full) && (!rd_reach_end)) begin
                                 app_af_cmd <= MIG_CMD_RD;

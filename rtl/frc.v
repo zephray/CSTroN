@@ -54,11 +54,15 @@ module frc(
     wire output_lower_b;
     
     // GLDP
+    wire gldp_inv;
+    //assign gldp_inv = 1'b0;
+    assign gldp_inv = x[0]^y[0];
+    
     gldp_lut gldp_lut_upper_r(
         .rst(rst),
         .flm(vsync),
         .raw_in(upper_r),
-        .inv(x[0]^y[0]),
+        .inv(gldp_inv),
         .dither_out(output_upper_r)
     );
     
@@ -66,7 +70,7 @@ module frc(
         .rst(rst),
         .flm(vsync),
         .raw_in(upper_g),
-        .inv(x[0]^y[0]),
+        .inv(gldp_inv),
         .dither_out(output_upper_g)
     );
     
@@ -74,7 +78,7 @@ module frc(
         .rst(rst),
         .flm(vsync),
         .raw_in(upper_b),
-        .inv(x[0]^y[0]),
+        .inv(gldp_inv),
         .dither_out(output_upper_b)
     );
     
@@ -82,7 +86,7 @@ module frc(
         .rst(rst),
         .flm(vsync),
         .raw_in(lower_r),
-        .inv(x[0]^y[0]),
+        .inv(gldp_inv),
         .dither_out(output_lower_r)
     );
 
@@ -90,7 +94,7 @@ module frc(
         .rst(rst),
         .flm(vsync),
         .raw_in(lower_g),
-        .inv(x[0]^y[0]),
+        .inv(gldp_inv),
         .dither_out(output_lower_g)
     );
     
@@ -98,7 +102,7 @@ module frc(
         .rst(rst),
         .flm(vsync),
         .raw_in(lower_b),
-        .inv(x[0]^y[0]),
+        .inv(gldp_inv),
         .dither_out(output_lower_b)
     );
 
@@ -106,7 +110,7 @@ module frc(
         output_lower_r, output_lower_g, output_lower_b};
 
     // Pipeline
-    assign seq_rd_clk = ~clk;
+    assign seq_rd_clk = clk;
 
     reg data_valid_next_clock;
     reg data_valid;
@@ -135,6 +139,8 @@ module frc(
     // Stage 2: Process
     reg data_ready;
     reg vsync_last;
+    reg vsync_sync_1;
+    reg vsync_sync_2;
     always @(posedge clk, posedge rst)
     begin
         if (rst) begin
@@ -145,11 +151,15 @@ module frc(
             y <= 0;
         end
         else begin
+            vsync_sync_1 <= vsync;
+            vsync_sync_2 <= vsync_sync_1;
+        
             if (data_valid) begin
                 upper_pixel <= seq_rd_data[31:16];
                 lower_pixel <= seq_rd_data[15:0];
                 data_ready <= 1'b1;
-                if ((vsync_last == 1'b0)&&(vsync == 1'b1)) begin
+                vsync_last <= vsync_sync_2;
+                if ((vsync_last == 1'b0)&&(vsync_sync_2 == 1'b1)) begin
                     x <= 0;
                     y <= 0;
                 end

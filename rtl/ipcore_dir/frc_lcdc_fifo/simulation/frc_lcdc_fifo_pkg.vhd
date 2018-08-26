@@ -201,6 +201,7 @@ PACKAGE frc_lcdc_fifo_pkg IS
            WR_CLK                    : IN  std_logic;
      	   RD_CLK                    : IN  std_logic;
            RST                       : IN  std_logic;
+           PROG_FULL                 : OUT std_logic;
            WR_EN 		     : IN  std_logic;
            RD_EN                     : IN  std_logic;
            DIN                       : IN  std_logic_vector(6-1 DOWNTO 0);

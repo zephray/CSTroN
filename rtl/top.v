@@ -86,15 +86,15 @@ module top(
     input          GPIO_SW_E,
     input          GPIO_SW_S,
     input          GPIO_SW_N,
-    //input  [7:0]   GPIO_DIP_SW,
+//    input  [7:0]   GPIO_DIP_SW,
     
     // LED
     output [7:0]   GPIO_LED,
-    //output         GPIO_LED_C,
-    //output         GPIO_LED_W,
-    //output         GPIO_LED_E,
-    //output         GPIO_LED_S,
-    //output         GPIO_LED_N,
+    output         GPIO_LED_C,
+    output         GPIO_LED_W,
+    output         GPIO_LED_E,
+    output         GPIO_LED_S,
+    output         GPIO_LED_N,
 
     // DDR2
     inout  [63:0]  DDR2_D,
@@ -118,13 +118,13 @@ module top(
     //output         PIEZO_SPEAKER,
     
     // DVI
-    //output [11:0]  DVI_D,
-    //output         DVI_DE,
-    //output         DVI_H,
-    //output         DVI_RESET_B,
-    //output         DVI_V,
-    //output         DVI_XCLK_N,
-    //output         DVI_XCLK_P,
+    output [11:0]  DVI_D,
+    output         DVI_DE,
+    output         DVI_H,
+    output         DVI_RESET_B,
+    output         DVI_V,
+    output         DVI_XCLK_N,
+    output         DVI_XCLK_P,
     //input          DVI_GPIO1,
     
     // Dual Shock 2
@@ -168,16 +168,25 @@ module top(
 
     assign clk_33 = CLK_33MHZ_FPGA;
     assign rst_in = ~FPGA_CPU_RESET_B;
+    
+    // Intel HD: 28
+    // nVIDIA GTX: 22
+    reg [4:0] vga_phase = 5'd22;
+  
+    clk_div #(.WIDTH(26), .DIV(50000000)) key_clk_div(
+        .i(clk_35),
+        .o(clk_key)
+    );
   
     //Keys
-    wire lcd_vsync;
-    /*button button_c(
+    button button_c(
         .pressed(), 
         .pressed_disp(GPIO_LED_C),
         .button_input(GPIO_SW_C),
         .clock(clk_35),
         .reset(rst)
     );
+    assign image_hold = GPIO_LED_C;
     
     button button_w(
         .pressed(), 
@@ -195,13 +204,26 @@ module top(
         .reset(rst)
     );
     
+    always @(posedge clk_key) begin
+        if (GPIO_LED_W)
+            vga_phase <= vga_phase - 1'b1;
+        else if (GPIO_LED_E)
+            vga_phase <= vga_phase + 1'b1;
+    end
+    
     button button_s(
         .pressed(), 
         .pressed_disp(GPIO_LED_S),
         .button_input(GPIO_SW_S),
         .clock(clk_35),
         .reset(rst)
-    );*/
+    );
+    assign write_hold = GPIO_LED_S;
+    
+    wire frc_vsync;
+    wire lcd_vsync;
+    wire fifo_input_reset;
+    wire fifo_output_reset;
     
     // VGA Input
     wire vga_seq_wr_en;
@@ -226,15 +248,37 @@ module top(
         .vga_pixel_b(VGA_IN_BLUE),
         .vga_pixel_g(VGA_IN_GREEN),
         .vga_sync_out(vga_vsync),
+        .vga_phase(vga_phase),
         .seq_wr_en(vga_seq_wr_en),
         .seq_wr_clk(vga_seq_wr_clk),
         .seq_wr_data(vga_seq_wr_data),
         .iic_done(iic_done)
     );
     
+    dvi_module dvi_module(  
+        //Outputs
+        .dvi_vs(DVI_V),        
+        .dvi_hs(DVI_H), 
+        .dvi_d(DVI_D), 
+        .dvi_xclk_p(DVI_XCLK_P), 
+        .dvi_xclk_n(DVI_XCLK_N),
+        .dvi_de(DVI_DE), 
+        .dvi_reset_b(DVI_RESET_B),  
+        //Inputs
+        .pixel_clk(VGA_IN_DATA_CLK), 
+        .gpuclk_rst(rst), 
+        .hsync(~VGA_IN_HSOUT),
+        .vsync(~VGA_IN_VSOUT),
+        .blank_b(vga_seq_wr_en),
+        .pixel_r(VGA_IN_RED),
+        .pixel_b(VGA_IN_BLUE),
+        .pixel_g(VGA_IN_GREEN)
+    );
+    
     // VGA 2 SEQ FIFO
     vga_seq_fifo vga_seq_fifo(
-        .rst(rst), // input rst
+        //.rst(rst),
+        .rst(fifo_input_reset), // input rst
         .wr_clk(vga_seq_wr_clk), // input wr_clk
         .rd_clk(vga_seq_rd_clk), // input rd_clk
         .din(vga_seq_wr_data), // input [15 : 0] din
@@ -257,9 +301,11 @@ module top(
     wire seq_frc_rd_en;
     wire seq_frc_rd_empty;
     seq_frc_fifo seq_frc_fifo (
-        .rst(rst), // input rst
+        //.rst(rst),
+        .rst(fifo_output_reset), // input rst
         .wr_clk(seq_frc_wr_clk), // input wr_clk
         .rd_clk(seq_frc_rd_clk), // input rd_clk
+        //.din(128'hF800F80000000000F800F80000000000),
         .din(seq_frc_wr_data), // input [127 : 0] din
         .wr_en(seq_frc_wr_en), // input wr_en
         .rd_en(seq_frc_rd_en), // input rd_en
@@ -299,12 +345,17 @@ module top(
         .frc_wr_en(seq_frc_wr_en),
         .frc_wr_data(seq_frc_wr_data),
         .frc_wr_almost_full(seq_frc_wr_almost_full),
+        .frc_vsync(frc_vsync),
         .lcdc_vsync(lcd_vsync),
         .vga_rd_clk(vga_seq_rd_clk),
         .vga_rd_en(vga_seq_rd_en),
         .vga_rd_empty(vga_seq_rd_almost_empty),
         .vga_rd_data(vga_seq_rd_data),
         .vga_vsync(vga_vsync),
+        .fifo_input_reset(fifo_input_reset),
+        .fifo_output_reset(fifo_output_reset),
+        .image_hold(image_hold),
+        .write_hold(write_hold),
         .phy_init_done(phy_init_done),
         .dbg_state(),
         .af_wren(af_wren),
@@ -353,12 +404,13 @@ module top(
         .seq_rd_en(seq_frc_rd_en),
         .seq_rd_empty(seq_frc_rd_empty),
         .seq_rd_clk(seq_frc_rd_clk),
-        .vsync(lcd_vsync)
+        .vsync(frc_vsync)
     );
 
     // FIFO
     frc_lcdc_fifo frc_lcdc_fifo (
-        .rst(rst), // input rst
+        //.rst(rst), // input rst
+        .rst(fifo_output_reset), // input rst
         .wr_clk(frc_lcd_wr_clk), // input wr_clk
         .rd_clk(frc_lcd_rd_clk), // input rd_clk
         .din(frc_lcd_wr_data), // input [5 : 0] din
@@ -382,9 +434,8 @@ module top(
     assign GPIO_LED[1] = pll_locked;
     assign GPIO_LED[0] = phy_init_done;
     
-    assign DEBUG_1 = vga_vsync;
-    assign DEBUG_2 = wdf_wren;
-    assign DEBUG_3 = af_wren;
-    assign DEBUG_4 = wr_buf;
-    
+    assign DEBUG_1 = fifo_output_reset;
+    assign DEBUG_2 = af_wren;
+    assign DEBUG_3 = fifo_input_reset;
+    assign DEBUG_4 = wdf_wren;    
 endmodule

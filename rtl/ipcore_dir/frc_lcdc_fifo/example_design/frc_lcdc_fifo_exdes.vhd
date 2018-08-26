@@ -76,6 +76,7 @@ entity frc_lcdc_fifo_exdes is
            WR_CLK                    : IN  std_logic;
      	   RD_CLK                    : IN  std_logic;
            RST                       : IN  std_logic;
+           PROG_FULL                 : OUT std_logic;
            WR_EN 		     : IN  std_logic;
            RD_EN                     : IN  std_logic;
            DIN                       : IN  std_logic_vector(6-1 DOWNTO 0);
@@ -99,6 +100,7 @@ architecture xilinx of frc_lcdc_fifo_exdes is
            WR_CLK                    : IN  std_logic;
      	   RD_CLK                    : IN  std_logic;
            RST                       : IN  std_logic;
+           PROG_FULL                 : OUT std_logic;
            WR_EN 		     : IN  std_logic;
            RD_EN                     : IN  std_logic;
            DIN                       : IN  std_logic_vector(6-1 DOWNTO 0);
@@ -129,6 +131,7 @@ begin
            WR_CLK                    => wr_clk_i,
            RD_CLK                    => rd_clk_i,
            RST                       => rst,
+           PROG_FULL                 => prog_full,
            WR_EN 		     => wr_en,
            RD_EN                     => rd_en,
            DIN                       => din,

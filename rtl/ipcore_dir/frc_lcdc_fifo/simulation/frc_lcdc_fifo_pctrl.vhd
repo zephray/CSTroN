@@ -332,8 +332,8 @@ END PROCESS;
   END PROCESS;
 
   fifo_d_chk:IF(C_CH_TYPE /= 2) GENERATE
-    PRC_WR_EN  <= prc_we_i  AFTER 100 ns;
-    PRC_RD_EN  <= prc_re_i  AFTER 50 ns;
+    PRC_WR_EN  <= prc_we_i  AFTER 50 ns;
+    PRC_RD_EN  <= prc_re_i  AFTER 100 ns;
     data_chk_i <= dout_chk;
   END GENERATE fifo_d_chk;
   -----------------------------------------------------

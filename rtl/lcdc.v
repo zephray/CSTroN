@@ -134,7 +134,7 @@ module lcdc(
                 end 
                 
                 // FIFO read enable
-                if ((v_count < V_ACT) && (h_count > (H_FRONT - 6))&&(h_count <= (H_FRONT + H_ACT - 6))) begin
+                if ((v_count < V_ACT) && (h_count > (H_FRONT - 3))&&(h_count <= (H_FRONT + H_ACT - 3))) begin
                     if (~iclk) begin // rising edge
                         if (div3 == 2'b00) begin
                             if (!fifo_empty) fifo_re <= 1'b1; else fifo_re <= 1'b0;
